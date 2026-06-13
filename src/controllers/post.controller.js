@@ -12,6 +12,8 @@ export const createPost = asyncHandler(async (req, res, next) => {
   const post = await Post.create({
     title,
     content,
+    image: req.file ? req.file.filename : null,
+
     author: req.user._id,
   });
 
