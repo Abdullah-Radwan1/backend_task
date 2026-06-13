@@ -1,5 +1,6 @@
 import Post from '../models/Post.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
+import { AppError } from '../utils/appError.ut.js';
 
 // @desc    Create a new post
 // @route   POST /api/posts
@@ -43,9 +44,7 @@ export const getPostById = asyncHandler(async (req, res, next) => {
   const post = await Post.findById(req.params.id).populate('author', 'name email');
 
   if (!post) {
-    const err = new Error('Post not found');
-    err.statusCode = 404;
-    return next(err);
+    return next(new AppError('Post not found', 404));
   }
 
   res.status(200).json({
@@ -63,16 +62,12 @@ export const updatePost = asyncHandler(async (req, res, next) => {
   let post = await Post.findById(req.params.id);
 
   if (!post) {
-    const err = new Error('Post not found');
-    err.statusCode = 404;
-    return next(err);
+    return next(new AppError('Post not found', 404));
   }
 
   // Strict ownership check
   if (post.author.toString() !== req.user._id.toString()) {
-    const err = new Error('Not authorized to update this post');
-    err.statusCode = 403;
-    return next(err);
+    return next(new AppError('Not authorized to update this post', 403));
   }
 
   // Update fields
@@ -96,16 +91,12 @@ export const deletePost = asyncHandler(async (req, res, next) => {
   const post = await Post.findById(req.params.id);
 
   if (!post) {
-    const err = new Error('Post not found');
-    err.statusCode = 404;
-    return next(err);
+    return next(new AppError('Post not found', 404));
   }
 
   // Strict ownership check
   if (post.author.toString() !== req.user._id.toString()) {
-    const err = new Error('Not authorized to delete this post');
-    err.statusCode = 403;
-    return next(err);
+    return next(new AppError('Not authorized to delete this post', 403));
   }
 
   await post.deleteOne();
