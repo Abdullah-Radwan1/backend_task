@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
+import cookieParser from 'cookie-parser';
 import apiRouter from './routes/index.js';
 import { errorHandler } from './middlewares/error.middleware.js';
 
@@ -14,6 +15,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 // Request logging
 if (process.env.NODE_ENV !== 'test') {
@@ -21,7 +23,7 @@ if (process.env.NODE_ENV !== 'test') {
 }
 
 // Mount API routes
-app.use('/api', apiRouter);
+app.use('/v1', apiRouter);
 
 // Fallback for undefined routes (404)
 app.use((req, res, next) => {

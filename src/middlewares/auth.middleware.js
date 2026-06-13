@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
+import { AppError } from '../utils/appError.ut.js';
 
 export const protect = async (req, res, next) => {
   let token;
@@ -8,35 +9,30 @@ export const protect = async (req, res, next) => {
     req.headers.authorization &&
     req.headers.authorization.startsWith('Bearer')
   ) {
-    try {
-      // Extract the token
-      token = req.headers.authorization.split(' ')[1];
-
-      // Verify the token
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-      // Retrieve user from database (excluding the hashed password)
-      const user = await User.findById(decoded.id).select('-password');
-      
-      if (!user) {
-        const err = new Error('Not authorized, user not found');
-        err.statusCode = 401;
-        return next(err);
-      }
-
-      // Attach user to request context
-      req.user = user;
-      return next();
-    } catch (error) {
-      const err = new Error('Not authorized, token verification failed');
-      err.statusCode = 401;
-      return next(err);
-    }
+    token = req.headers.authorization.split(' ')[1];
+  } else if (req.cookies && req.cookies.token) {
+    token = req.cookies.token;
   }
 
   if (!token) {
-    const err = new Error('Not authorized, no token provided');
-    err.statusCode = 401;
-    return next(err);
+    return next(new AppError('Not authorized, no token provided', 401));
+  }
+
+  try {
+    // Verify the token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    // Retrieve user from database (excluding the hashed password)
+    const user = await User.findById(decoded.id).select('-password');
+    
+    if (!user) {
+      return next(new AppError('Not authorized, user not found', 401));
+    }
+
+    // Attach user to request context
+    req.user = user;
+    return next();
+  } catch (error) {
+    return next(new AppError('Not authorized, token verification failed', 401));
   }
 };
