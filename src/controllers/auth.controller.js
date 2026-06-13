@@ -40,7 +40,7 @@ const sendTokenResponse = (user, statusCode, message, res) => {
 };
 
 // @desc    Register a new user
-// @route   POST /api/auth/register
+// @route   POST /v1/auth/register
 // @access  Public
 export const register = asyncHandler(async (req, res, next) => {
   const { name, email, password } = req.body;
@@ -66,7 +66,7 @@ export const register = asyncHandler(async (req, res, next) => {
 });
 
 // @desc    Authenticate user & get token
-// @route   POST /api/auth/login
+// @route   POST /v1/auth/login
 // @access  Public
 export const login = asyncHandler(async (req, res, next) => {
   const { email, password } = req.body;
@@ -84,4 +84,21 @@ export const login = asyncHandler(async (req, res, next) => {
   }
 
   sendTokenResponse(user, 200, "Login successful", res);
+});
+
+// @desc    Logout user & clear cookie
+// @route   POST /v1/auth/logout
+// @access  Public
+export const logout = asyncHandler(async (req, res, next) => {
+  res.cookie("token", "", {
+    expires: new Date(0),
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+  });
+
+  res.status(200).json({
+    success: true,
+    message: "Logout successful",
+  });
 });
