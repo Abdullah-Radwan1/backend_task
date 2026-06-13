@@ -21,7 +21,7 @@ const sendTokenResponse = (user, statusCode, message, res) => {
     expires: new Date(Date.now() + cookieExpiresDays * 24 * 60 * 60 * 1000),
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    sameSite: "none",
   };
 
   res.cookie("token", token, cookieOptions);
@@ -94,11 +94,27 @@ export const logout = asyncHandler(async (req, res, next) => {
     expires: new Date(0),
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    sameSite: "none",
   });
 
   res.status(200).json({
     success: true,
     message: "Logout successful",
+  });
+});
+
+// @desc    Get current logged-in user
+// @route   GET /v1/auth/me
+// @access  Private
+export const getMe = asyncHandler(async (req, res, next) => {
+  res.status(200).json({
+    success: true,
+    data: {
+      user: {
+        id: req.user._id,
+        name: req.user.name,
+        email: req.user.email,
+      },
+    },
   });
 });
