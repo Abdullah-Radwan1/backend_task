@@ -1,33 +1,29 @@
-import multer from "multer";
-import path from "path";
-import fs from "fs";
-import { v4 as uuidv4 } from "uuid";
+import multer from 'multer';
+import path from 'path';
+import { v4 as uuidv4 } from 'uuid';
 
-export const createUploader = (folder) => {
-  const uploadPath = path.resolve("uploads", folder);
+// Destination folder for posts images
+const uploadPath = path.resolve('uploads', 'posts');
 
-  fs.mkdirSync(uploadPath, { recursive: true });
+// Multer storage configuration
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadPath);
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    const filename = `${uuidv4()}${ext}`;
+    cb(null, filename);
+  },
+});
 
-  const storage = multer.diskStorage({
-    destination(req, file, cb) {
-      cb(null, uploadPath);
-    },
-
-    filename(req, file, cb) {
-      cb(null, uuidv4() + path.extname(file.originalname));
-    },
-  });
-
-  const fileFilter = (req, file, cb) => {
-    if (file.mimetype.startsWith("image/")) {
-      cb(null, true);
-    } else {
-      cb(new Error("Only image files are allowed"));
-    }
-  };
-
-  return multer({
-    storage,
-    fileFilter,
-  });
+// File filter to accept only images
+const fileFilter = (req, file, cb) => {
+  if (file.mimetype.startsWith('image/')) {
+    cb(null, true);
+  } else {
+    cb(new Error('Only image files are allowed!'), false);
+  }
 };
+
+export const upload = multer({ storage, fileFilter });
