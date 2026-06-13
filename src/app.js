@@ -4,12 +4,16 @@ import morgan from "morgan";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import path from "path";
+import { fileURLToPath } from "url";
 import apiRouter from "./routes/index.js";
 import { globalErrorHandler } from "./utils/globalErrorhandler.js";
 import { apiLimiter } from "./middlewares/rateLimiter.middleware.js";
 
 // Initialize env config
 dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 
@@ -35,8 +39,8 @@ if (process.env.NODE_ENV !== "test") {
   app.use(morgan("dev"));
 }
 
-// Serve static uploads
-app.use("/uploads", express.static(path.resolve("uploads")));
+// Serve static uploads (absolute path — works regardless of CWD)
+app.use("/uploads", express.static(path.join(__dirname, "..", "uploads")));
 
 // Home route
 app.get("/", (req, res) => {
