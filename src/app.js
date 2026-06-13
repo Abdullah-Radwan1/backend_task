@@ -38,6 +38,11 @@ if (process.env.NODE_ENV !== "test") {
 // Serve static uploads
 app.use("/uploads", express.static(path.resolve("uploads")));
 
+// Home route
+app.get("/", (req, res) => {
+  res.json({ message: "Hello World" });
+});
+
 // Mount API routes
 app.use("/v1", apiRouter);
 
