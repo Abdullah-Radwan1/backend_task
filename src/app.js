@@ -14,9 +14,23 @@ dotenv.config();
 const app = express();
 
 // Global Middlewares
+const allowedOrigins = [
+  "http://localhost:5174",
+  "https://task-front-eta.vercel.app",
+];
+
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "http://localhost:5174",
+    origin: function (origin, callback) {
+      // allow mobile apps / postman (no origin)
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error("Not allowed by CORS"));
+    },
     credentials: true,
   })
 );
