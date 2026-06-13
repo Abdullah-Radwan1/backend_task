@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import apiRouter from "./routes/index.js";
 import { globalErrorHandler } from "./utils/globalErrorhandler.js";
+import { apiLimiter } from "./middlewares/rateLimiter.middleware.js";
 
 // Initialize env config
 dotenv.config();
@@ -16,6 +17,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+app.use(apiLimiter);
 
 // Request logging
 if (process.env.NODE_ENV !== "test") {
